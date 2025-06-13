@@ -22,25 +22,41 @@ const Carousel: React.FC<CarouselProps> = ({
   const maxPosition = Math.max(images.length - frameSize, 0);
 
   const next = () => {
-    if (infinite) {
-      setPosition((prevPos) => (prevPos + step > maxPosition ? 0 : prevPos + step));
-    } else {
-      setPosition((prevPos) => Math.min(prevPos + step, maxPosition));
-    }
+    setPosition(prevPos => {
+      const newPosition = prevPos + step;
+
+      if (infinite) {
+        return newPosition % images.length;
+      }
+
+      return Math.min(newPosition, maxPosition);
+    });
   };
 
   const prev = () => {
-    if (infinite) {
-      setPosition((prevPos) => (prevPos - step < 0 ? maxPosition : prevPos - step));
-    } else {
-      setPosition((prevPos) => Math.max(prevPos - step, 0));
-    }
+    setPosition(prevPos => {
+      const newPosition = prevPos - step;
+
+      if (infinite) {
+        // Добавляем длину и снова берём модуль, чтобы избежать отрицательных значений
+        return (newPosition + images.length) % images.length;
+      }
+
+      return Math.max(newPosition, 0);
+    });
   };
 
   const containerWidth = itemWidth * frameSize;
 
   return (
-    <div style={{ width: containerWidth, overflow: 'hidden', position: 'relative', margin: 'auto' }}>
+    <div
+      style={{
+        width: containerWidth,
+        overflow: 'hidden',
+        position: 'relative',
+        margin: 'auto',
+      }}
+    >
       <ul
         style={{
           display: 'flex',
@@ -94,7 +110,8 @@ const Carousel: React.FC<CarouselProps> = ({
           top: '50%',
           right: 0,
           transform: 'translateY(-50%)',
-          cursor: !infinite && position >= maxPosition ? 'not-allowed' : 'pointer',
+          cursor:
+            !infinite && position >= maxPosition ? 'not-allowed' : 'pointer',
           opacity: !infinite && position >= maxPosition ? 0.5 : 1,
           background: 'none',
           border: 'none',
